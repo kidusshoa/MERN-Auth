@@ -16,13 +16,19 @@ export const signup = async (req, res) => {
         .json({ success: false, message: "User already exists" });
     }
     const hashedPassword = await bcryptjs.hash(password, 10);
-    const verificationCode = generateVerificationCode();
+    const verificationToken = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
 
     const user = new User({
       email,
       password: hashedPassword,
       name,
+      verificationToken,
+      verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
     });
+
+    await user.save();
   } catch (error) {
     return res
       .status(400)
